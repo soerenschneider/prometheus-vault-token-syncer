@@ -7,13 +7,13 @@ RUN go mod download
 COPY ./ ./
 ENV CGO_ENABLED=0
 RUN go mod download
-RUN CGO_ENABLED=0 go build -ldflags "-w" -o /vault-prometheus-token .
+RUN CGO_ENABLED=0 go build -ldflags "-w" -o /prometheus-vault-token-syncer .
 
 
 FROM gcr.io/distroless/static AS final
 
 LABEL maintainer="soerenschneider"
 USER nonroot:nonroot
-COPY --from=build --chown=nonroot:nonroot /vault-prometheus-token /vault-prometheus-token
+COPY --from=build --chown=nonroot:nonroot /prometheus-vault-token-syncer /prometheus-vault-token-syncer
 
-ENTRYPOINT ["/vault-prometheus-token"]
+ENTRYPOINT ["/prometheus-vault-token-syncer"]
