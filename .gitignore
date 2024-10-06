@@ -1,0 +1,10 @@
+/.idea
+/builds
+/prometheus-vault-token-syncer
+/coverage.*
+
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
