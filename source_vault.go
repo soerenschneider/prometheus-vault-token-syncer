@@ -55,3 +55,7 @@ func (s *VaultTokenSource) Receive(ctx context.Context) (string, error) {
 
 	return secret.Auth.ClientToken, nil
 }
+
+func (s *VaultTokenSource) Cleanup(ctx context.Context) error {
+	return s.client.Auth().Token().RevokeSelf("xxx")
+}
