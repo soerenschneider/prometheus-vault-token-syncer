@@ -5,6 +5,7 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"time"
 )
 
 type TokenSource interface {
@@ -21,13 +22,15 @@ type App struct {
 }
 
 func main() {
-	ctx := context.TODO()
 	app, err := buildApp()
 	if err != nil {
 		slog.Error("could not build app", "err", err)
 	}
 
-	token, err := app.source.GetToken(ctx)
+	ctx, cancel := context.WithTimeout(context.TODO(), 15*time.Second)
+	defer cancel()
+
+	token, err := app.source.Receive(ctx)
 	if err != nil {
 		slog.Error("could not get token", "err", err)
 		os.Exit(1)
