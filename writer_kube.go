@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
+	kubeErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -20,6 +21,18 @@ type KubeTokenWriter struct {
 }
 
 func NewKubeTokenWriter(secretName, secretKey, namespace string) (*KubeTokenWriter, error) {
+	if secretName == "" {
+		return nil, errors.New("no secret name supplied")
+	}
+
+	if secretKey == "" {
+		return nil, errors.New("no secret key supplied")
+	}
+
+	if namespace == "" {
+		return nil, errors.New("no secret namespace supplied")
+	}
+
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, err
@@ -53,7 +66,7 @@ func (w *KubeTokenWriter) Write(ctx context.Context, data []byte) error {
 
 	_, err := w.client.CoreV1().Secrets(w.namespace).Create(ctx, secret, metav1.CreateOptions{})
 	if err != nil {
-		if errors.IsAlreadyExists(err) {
+		if kubeErrors.IsAlreadyExists(err) {
 			_, err = w.client.CoreV1().Secrets(w.namespace).Update(ctx, secret, metav1.UpdateOptions{})
 			if err != nil {
 				return fmt.Errorf("failed to update secret: %v", err)
