@@ -39,7 +39,7 @@ func NewVaultTokenSource(role, mount string) (*VaultTokenSource, error) {
 	}, nil
 }
 
-func (s *VaultTokenSource) GetToken(ctx context.Context) (string, error) {
+func (s *VaultTokenSource) Receive(ctx context.Context) (string, error) {
 	k8sAuth, err := auth.NewKubernetesAuth(
 		s.role,
 		auth.WithMountPath(s.mountPath),
