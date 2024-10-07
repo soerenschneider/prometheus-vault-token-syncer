@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"log/slog"
 	"os"
@@ -42,16 +43,16 @@ func main() {
 
 func buildApp() (*App, error) {
 	role := os.Getenv("VAULT_ROLE")
-	mount := os.Getenv("VAULT_MOUNT_PATH")
-	secretNamespace := os.Getenv("SECRET_NAMESPACE")
+	mount := getEnvOrDefault("VAULT_MOUNT_PATH", "kubernetes")
 
 	tokenSource, err := NewVaultTokenSource(role, mount)
 	if err != nil {
 		return nil, err
 	}
 
-	secretName := "prometheus-vault-token"
-	secretKey := "vault-token"
+	secretName := getEnvOrDefault("SECRET_NAME", "prometheus-vault-token")
+	secretKey := getEnvOrDefault("SECRET_KEY", "vault-token")
+	secretNamespace := getEnvOrDefault("SECRET_NAMESPACE", "default")
 
 	tokenWriter, err := NewKubeTokenWriter(secretName, secretKey, secretNamespace)
 	if err != nil {
@@ -62,4 +63,8 @@ func buildApp() (*App, error) {
 		source: tokenSource,
 		dest:   tokenWriter,
 	}, nil
+}
+
+func getEnvOrDefault(key, defaultValue string) string {
+	return cmp.Or(os.Getenv(key), defaultValue)
 }
