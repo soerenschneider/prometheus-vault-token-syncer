@@ -9,7 +9,8 @@ import (
 )
 
 type TokenSource interface {
-	GetToken(ctx context.Context) (string, error)
+	Receive(ctx context.Context) (string, error)
+	Cleanup(ctx context.Context) error
 }
 
 type TokenWriter interface {
@@ -38,7 +39,10 @@ func main() {
 	slog.Info("Token received")
 
 	if err := app.dest.Write(ctx, []byte(token)); err != nil {
-		slog.Error("could not write token", "err", err)
+		slog.Error("could not write token, trying to cleanup", "err", err)
+		if err := app.source.Cleanup(ctx); err != nil {
+			slog.Error("error while cleaning up token", "err", err)
+		}
 		os.Exit(1)
 	}
 	slog.Info("Wrote received token to configured storage")
