@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/hashicorp/vault/api"
@@ -16,6 +17,14 @@ type VaultTokenSource struct {
 }
 
 func NewVaultTokenSource(role, mount string) (*VaultTokenSource, error) {
+	if role == "" {
+		return nil, errors.New("no vault role supplied")
+	}
+
+	if mount == "" {
+		return nil, errors.New("no vault mount path supplied")
+	}
+
 	config := api.DefaultConfig()
 
 	client, err := api.NewClient(config)
